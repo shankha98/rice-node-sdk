@@ -57,14 +57,14 @@ async function main() {
     console.error("Reminisce failed:", e);
   }
 
-  // 4. Cleanup
-  try {
-    console.log("\n[4] Cleaning up run...");
-    await client.deleteRun();
-    console.log("Run deleted successfully.");
-  } catch (e) {
-    console.error("Cleanup failed:", e);
-  }
+  // // 4. Cleanup
+  // try {
+  //   console.log("\n[4] Cleaning up run...");
+  //   await client.deleteRun();
+  //   console.log("Run deleted successfully.");
+  // } catch (e) {
+  //   console.error("Cleanup failed:", e);
+  // }
 }
 
 main().catch(console.error);
