@@ -4,6 +4,9 @@
     "description": "Unified Node.js SDK for RiceDB (Storage) and State (AI Memory)",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build": "tsc && npm run copy-proto",
         "copy-proto": "mkdir -p dist/state/proto && cp src/state/proto/state.proto dist/state/proto/state.proto",
