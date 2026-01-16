@@ -4,6 +4,28 @@
     "description": "SDK for Rice",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./tools/anthropic": {
+            "types": "./dist/tools/anthropic.d.ts",
+            "default": "./dist/tools/anthropic.js"
+        },
+        "./tools/google": {
+            "types": "./dist/tools/google.d.ts",
+            "default": "./dist/tools/google.js"
+        },
+        "./tools/openai": {
+            "types": "./dist/tools/openai.d.ts",
+            "default": "./dist/tools/openai.js"
+        },
+        "./tools/execute": {
+            "types": "./dist/tools/execute.d.ts",
+            "default": "./dist/tools/execute.js"
+        }
+    },
     "files": [
         "dist"
     ],

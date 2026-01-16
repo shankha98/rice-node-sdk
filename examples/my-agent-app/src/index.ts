@@ -1,4 +1,6 @@
-import { Client, statetool } from "../../../dist";
+import { Client } from "../../../dist";
+import { state as anthropicTools } from "../../../dist/tools/anthropic";
+import { execute } from "../../../dist/tools/execute";
 
 async function main() {
   const client = new Client();
@@ -16,12 +18,13 @@ async function main() {
 
     console.log(`[LLM] Calling tool: ${toolCall.name} with`, toolCall.args);
 
-    // Execute tool
-    const result = await statetool.execute(
-      toolCall.name,
-      toolCall.args,
-      client.state
+    // Verify definitions are loaded (just for demo)
+    console.log(
+      `[Demo] Loaded ${anthropicTools.length} Anthropic tool definitions.`
     );
+
+    // Execute tool
+    const result = await execute(toolCall.name, toolCall.args, client.state);
     console.log(`[Tool] Result: ${result}`);
 
     // Recall
@@ -31,11 +34,7 @@ async function main() {
     };
     console.log(`[LLM] Calling tool: ${toolCall2.name} with`, toolCall2.args);
 
-    const result2 = await statetool.execute(
-      toolCall2.name,
-      toolCall2.args,
-      client.state
-    );
+    const result2 = await execute(toolCall2.name, toolCall2.args, client.state);
     console.log(`[Tool] Result (Memories):`);
     if (Array.isArray(result2)) {
       result2.forEach((m: any) =>
