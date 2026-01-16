@@ -91,6 +91,11 @@ STATE_INSTANCE_URL=localhost:50051
 STATE_AUTH_TOKEN=my-secret-token
 # Default Run ID for memory sessions (optional)
 STATE_RUN_ID=default-run-id
+
+# --- LLM Providers (for examples) ---
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+GOOGLE_API_KEY=...
 ```
 
 ### 3. Advanced Configuration
