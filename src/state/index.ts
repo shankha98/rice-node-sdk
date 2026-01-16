@@ -49,6 +49,14 @@ export class StateClient {
   }
 
   /**
+   * Sets the run ID for subsequent operations.
+   * @param runId - The new run ID to use.
+   */
+  setRunId(runId: string) {
+    this.runId = runId;
+  }
+
+  /**
    * Focuses the state on a specific content or context.
    * @param content - The content to focus on.
    * @returns A promise that resolves to the ID of the focus operation.

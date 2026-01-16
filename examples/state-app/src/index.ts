@@ -43,6 +43,19 @@ async function main() {
       console.warn("Delete Run failed (known server issue):", e.message);
     }
 
+    // 6. Test Switching Run ID
+    console.log('[6] Switching Run ID to "new-run-id"...');
+    client.state.setRunId("new-run-id");
+
+    console.log("[6.1] Focusing with new Run ID...");
+    const focusId2 = await client.state.focus("New Context");
+    console.log("New Focus ID:", focusId2);
+
+    console.log("[6.2] Drifting with new Run ID...");
+    const driftItems2 = await client.state.drift();
+    console.log(`Drift items (should be 1): ${driftItems2.length}`);
+    driftItems2.forEach((item: any) => console.log(` - ${item.content}`));
+
     // Check Storage (should fail)
     try {
       console.log("Checking if Storage is disabled...");

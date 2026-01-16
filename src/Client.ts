@@ -4,19 +4,31 @@ import { StateClient } from "./state";
 import * as dotenv from "dotenv";
 import * as path from "path";
 
+export interface ClientOptions {
+  configPath?: string;
+  runId?: string;
+}
+
 export class Client {
   private _config: RiceConfig | null = null;
   private _storage: RiceDBClient | null = null;
   private _state: StateClient | null = null;
+  private options: ClientOptions;
 
-  constructor(private configPath?: string) {}
+  constructor(optionsOrPath?: string | ClientOptions) {
+    if (typeof optionsOrPath === "string") {
+      this.options = { configPath: optionsOrPath };
+    } else {
+      this.options = optionsOrPath || {};
+    }
+  }
 
   async connect() {
     // Load environment variables
     dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
     // Load config
-    this._config = await loadConfig(this.configPath);
+    this._config = await loadConfig(this.options.configPath);
 
     // Initialize Storage
     if (this._config.storage?.enabled) {
@@ -63,7 +75,8 @@ export class Client {
     if (this._config.state?.enabled) {
       const address = process.env.STATE_INSTANCE_URL || "localhost:50051";
       const token = process.env.STATE_AUTH_TOKEN;
-      this._state = new StateClient(address, token);
+      const runId = this.options.runId || process.env.STATE_RUN_ID || "default";
+      this._state = new StateClient(address, token, runId);
     }
   }
 
