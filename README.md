@@ -267,4 +267,4 @@ interface StateClient {
 
 ## License
 
-ISC
+Proprietary. All Rights Reserved.
