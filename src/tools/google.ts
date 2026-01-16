@@ -4,10 +4,10 @@ export const state = [
     description:
       "Stores a piece of information in working memory (State/Flux).",
     parameters: {
-      type: "object",
+      type: "OBJECT",
       properties: {
         content: {
-          type: "string",
+          type: "STRING",
           description: "The information to remember.",
         },
       },
@@ -18,9 +18,9 @@ export const state = [
     name: "recall",
     description: "Recalls relevant memories from State based on a query.",
     parameters: {
-      type: "object",
+      type: "OBJECT",
       properties: {
-        query: { type: "string", description: "The query to search for." },
+        query: { type: "STRING", description: "The query to search for." },
       },
       required: ["query"],
     },
@@ -29,11 +29,11 @@ export const state = [
     name: "save_experience",
     description: "Saves an interaction experience to long-term memory.",
     parameters: {
-      type: "object",
+      type: "OBJECT",
       properties: {
-        input: { type: "string", description: "The user input or trigger." },
-        outcome: { type: "string", description: "The result or outcome." },
-        action: { type: "string", description: "The action taken." },
+        input: { type: "STRING", description: "The user input or trigger." },
+        outcome: { type: "STRING", description: "The result or outcome." },
+        action: { type: "STRING", description: "The action taken." },
       },
       required: ["input", "outcome", "action"],
     },
