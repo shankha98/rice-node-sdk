@@ -1,7 +1,7 @@
 {
-    "name": "rice-node-sdk",
+    "name": "rice",
     "version": "1.0.0",
-    "description": "Unified Node.js SDK for RiceDB (Storage) and State (AI Memory)",
+    "description": "SDK for Rice",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
@@ -15,13 +15,7 @@
     },
     "keywords": [
         "rice",
-        "ricedb",
-        "state",
-        "sdk",
-        "ai",
-        "memory",
-        "database",
-        "vector"
+        "ai"
     ],
     "author": "",
     "license": "ISC",
