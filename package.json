@@ -1,5 +1,5 @@
 {
-    "name": "rice",
+    "name": "rice-node-sdk",
     "version": "1.0.0",
     "description": "SDK for Rice",
     "main": "dist/index.js",
