@@ -172,9 +172,12 @@ export class HttpClient extends BaseRiceDBClient {
     nodeId: Long | number | string,
     sessionId?: string
   ): Promise<boolean> {
-    const params: any = {};
+    const params: any = {
+      node_id: this.toLong(nodeId).toNumber(), // Use number or string? Try number first as insert uses number
+    };
     if (sessionId) params.session_id = sessionId;
 
+    // Try /node/:id but include node_id in query params as well, as server seems to require it in query
     await this.request(
       "DELETE",
       `/node/${this.toLong(nodeId).toString()}`,

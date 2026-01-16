@@ -5,7 +5,8 @@
         "start": "ts-node src/index.ts"
     },
     "dependencies": {
-        "dotenv": "^16.0.0"
+        "dotenv": "^16.0.0",
+        "rice-node-sdk": "file:../.."
     },
     "devDependencies": {
         "ts-node": "^10.0.0",

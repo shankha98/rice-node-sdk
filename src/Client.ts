@@ -51,9 +51,13 @@ export class Client {
       const token = process.env.STORAGE_AUTH_TOKEN;
       const user = process.env.STORAGE_USER || "admin";
 
+      const httpPort = process.env.STORAGE_HTTP_PORT
+        ? parseInt(process.env.STORAGE_HTTP_PORT, 10)
+        : 3000;
+
       // We assume STORAGE_INSTANCE_URL points to the gRPC port
       // Pass token to constructor initially (if it's a valid token, it works; if it's a password, we login)
-      this._storage = new RiceDBClient(host, "auto", port, 3000, token);
+      this._storage = new RiceDBClient(host, "auto", port, httpPort, token);
       await this._storage.connect();
 
       if (token) {
