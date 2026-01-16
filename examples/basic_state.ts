@@ -1,4 +1,4 @@
-import { state } from "../dist";
+import { StateClient } from "../dist";
 import * as dotenv from "dotenv";
 import path from "path";
 
@@ -16,7 +16,7 @@ async function main() {
   console.log(`Connecting to State Service at ${address}`);
   console.log(`Run ID: ${runId}`);
 
-  const client = new state(address, token, runId);
+  const client = new StateClient(address, token, runId);
 
   // 1. Focus
   try {
@@ -50,7 +50,7 @@ async function main() {
 
     const memories = await client.reminisce("status");
     console.log(`Found ${memories.length} relevant memories.`);
-    memories.forEach((m) => {
+    memories.forEach((m: any) => {
       console.log(` - [${m.agent_id}] ${m.input} -> ${m.outcome}`);
     });
   } catch (e) {

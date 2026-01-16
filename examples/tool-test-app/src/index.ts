@@ -13,10 +13,10 @@ async function main() {
 
   const content = `Tool Test Content ${runId}`;
 
-  // 1. Remember (Focus) -> Should affect Drift
-  console.log("[1] Executing remember...");
-  const resultFocus = await execute("remember", { content }, client.state);
-  console.log("Remember result:", resultFocus);
+  // 1. Focus -> Should affect Drift
+  console.log("[1] Executing focus...");
+  const resultFocus = await execute("focus", { content }, client.state);
+  console.log("Focus result:", resultFocus);
 
   // Check Drift to verify Remember
   const driftItems = await client.state.drift();
@@ -25,10 +25,10 @@ async function main() {
     driftItems.map((i: any) => i.content)
   );
 
-  // 2. Save Experience (Commit) -> Should affect Reminisce
-  console.log("[2] Executing save_experience...");
+  // 2. Remember (Commit) -> Should affect Reminisce
+  console.log("[2] Executing remember...");
   await execute(
-    "save_experience",
+    "remember",
     {
       input: `User input: ${content}`,
       outcome: "System outcome",
