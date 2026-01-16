@@ -1,6 +1,6 @@
 export const state = [
   {
-    name: "remember",
+    name: "focus",
     description:
       "Stores a piece of information in working memory (State/Flux).",
     parameters: {
@@ -8,7 +8,7 @@ export const state = [
       properties: {
         content: {
           type: "STRING",
-          description: "The information to remember.",
+          description: "The information to focus on.",
         },
       },
       required: ["content"],
@@ -26,16 +26,17 @@ export const state = [
     },
   },
   {
-    name: "save_experience",
-    description: "Saves an interaction experience to long-term memory.",
+    name: "remember",
+    description: "Stores information in long-term memory for future recall.",
     parameters: {
       type: "OBJECT",
       properties: {
-        input: { type: "STRING", description: "The user input or trigger." },
-        outcome: { type: "STRING", description: "The result or outcome." },
-        action: { type: "STRING", description: "The action taken." },
+        content: {
+          type: "STRING",
+          description: "The information to remember.",
+        },
       },
-      required: ["input", "outcome", "action"],
+      required: ["content"],
     },
   },
 ];

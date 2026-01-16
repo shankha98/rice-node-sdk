@@ -1,6 +1,6 @@
 export const state = [
   {
-    name: "remember",
+    name: "focus",
     description:
       "Stores a piece of information in working memory (State/Flux).",
     input_schema: {
@@ -8,7 +8,7 @@ export const state = [
       properties: {
         content: {
           type: "string",
-          description: "The information to remember.",
+          description: "The information to focus on.",
         },
       },
       required: ["content"],
@@ -26,19 +26,17 @@ export const state = [
     },
   },
   {
-    name: "save_experience",
-    description: "Saves an interaction experience to long-term memory.",
+    name: "remember",
+    description: "Stores information in long-term memory for future recall.",
     input_schema: {
       type: "object",
       properties: {
-        input: {
+        content: {
           type: "string",
-          description: "The user input or trigger.",
+          description: "The information to remember.",
         },
-        outcome: { type: "string", description: "The result or outcome." },
-        action: { type: "string", description: "The action taken." },
       },
-      required: ["input", "outcome", "action"],
+      required: ["content"],
     },
   },
 ];
