@@ -19,6 +19,7 @@ export class RiceDBClient extends BaseRiceDBClient {
   private transport: "grpc" | "http" | "auto";
   private _grpcPort: number;
   private _httpPort: number;
+  private token: string | undefined;
 
   /**
    * Creates a new RiceDB client instance.
@@ -26,17 +27,20 @@ export class RiceDBClient extends BaseRiceDBClient {
    * @param transport - The transport protocol to use: "grpc", "http", or "auto" (default: "auto").
    * @param grpcPort - The port for gRPC connections (default: 50051).
    * @param httpPort - The port for HTTP connections (default: 3000).
+   * @param token - Optional authentication token.
    */
   constructor(
     host: string = "localhost",
     transport: "grpc" | "http" | "auto" = "auto",
     grpcPort: number = 50051,
-    httpPort: number = 3000
+    httpPort: number = 3000,
+    token?: string
   ) {
     super(host, 0);
     this.transport = transport;
     this._grpcPort = grpcPort;
     this._httpPort = httpPort;
+    this.token = token;
   }
 
   /**
@@ -46,19 +50,23 @@ export class RiceDBClient extends BaseRiceDBClient {
    */
   async connect(): Promise<boolean> {
     if (this.transport === "grpc") {
-      this.client = new GrpcClient(this.host, this._grpcPort);
+      this.client = new GrpcClient(this.host, this._grpcPort, this.token);
       await this.client.connect();
       this.connected = true;
       return true;
     } else if (this.transport === "http") {
-      this.client = new HttpClient(this.host, this._httpPort);
+      this.client = new HttpClient(this.host, this._httpPort, this.token);
       await this.client.connect();
       this.connected = true;
       return true;
     } else {
       // Auto
       try {
-        const grpcClient = new GrpcClient(this.host, this._grpcPort);
+        const grpcClient = new GrpcClient(
+          this.host,
+          this._grpcPort,
+          this.token
+        );
         await grpcClient.connect();
         this.client = grpcClient;
         this.connected = true;
@@ -66,7 +74,7 @@ export class RiceDBClient extends BaseRiceDBClient {
       } catch (e) {
         // Fallback
         console.warn("gRPC connection failed, falling back to HTTP");
-        this.client = new HttpClient(this.host, this._httpPort);
+        this.client = new HttpClient(this.host, this._httpPort, this.token);
         await this.client.connect();
         this.connected = true;
         return true;

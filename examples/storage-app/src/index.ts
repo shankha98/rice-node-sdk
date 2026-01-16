@@ -11,6 +11,22 @@ async function main() {
     const health = await client.storage.health();
     console.log("Health:", health);
 
+    // Insert
+    console.log("Inserting document...");
+    const nodeId = Date.now(); // Must be Long/number for RiceDB
+    const insertResult = await client.storage.insert(
+      nodeId,
+      "Hello from Storage App",
+      { type: "example" }
+    );
+    console.log("Insert Result:", insertResult);
+
+    // Search
+    console.log("Searching...");
+    // search(query, userId, k, sessionId?, filter?, queryEmbedding?)
+    const searchResults = await client.storage.search("Hello", 1);
+    console.log("Search Results:", searchResults);
+
     // Attempt state access (should fail)
     try {
       console.log("Checking if State is disabled...");

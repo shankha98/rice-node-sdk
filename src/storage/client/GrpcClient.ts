@@ -17,8 +17,15 @@ export class GrpcClient extends BaseRiceDBClient {
   private client: ProtoClient | null = null;
   private token: string | null = null;
 
-  constructor(host: string = "localhost", port: number = 50051) {
+  constructor(
+    host: string = "localhost",
+    port: number = 50051,
+    token?: string
+  ) {
     super(host, port);
+    if (token) {
+      this.token = token;
+    }
   }
 
   async connect(): Promise<boolean> {

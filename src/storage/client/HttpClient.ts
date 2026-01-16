@@ -13,13 +13,19 @@ export class HttpClient extends BaseRiceDBClient {
   private client: AxiosInstance;
   private token: string | null = null;
 
-  constructor(host: string = "localhost", port: number = 3000) {
+  constructor(host: string = "localhost", port: number = 3000, token?: string) {
     super(host, port);
+    if (token) {
+      this.token = token;
+    }
     this.client = axios.create({
       baseURL: `http://${host}:${port}`,
       timeout: 30000,
       validateStatus: () => true, // Handle status codes manually
     });
+    if (this.token) {
+      this.setAuthHeader();
+    }
   }
 
   async connect(): Promise<boolean> {

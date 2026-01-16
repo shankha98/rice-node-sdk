@@ -36,9 +36,27 @@ export class Client {
         host = storageUrl;
       }
 
+      const token = process.env.STORAGE_AUTH_TOKEN;
+      const user = process.env.STORAGE_USER || "admin";
+
       // We assume STORAGE_INSTANCE_URL points to the gRPC port
-      this._storage = new RiceDBClient(host, "auto", port);
+      // Pass token to constructor initially (if it's a valid token, it works; if it's a password, we login)
+      this._storage = new RiceDBClient(host, "auto", port, 3000, token);
       await this._storage.connect();
+
+      if (token) {
+        try {
+          // Attempt auto-login using the token as password
+          console.log(`Attempting login for user ${user}...`);
+          const newToken = await this._storage.login(user, token);
+          console.log(`Login successful. Token length: ${newToken.length}`);
+        } catch (e) {
+          // If login fails, maybe the token was already a valid session token?
+          // Or credentials are wrong. We log warning but don't crash,
+          // allowing subsequent calls to fail if auth is missing.
+          console.warn(`Auto-login failed for user ${user}:`, e);
+        }
+      }
     }
 
     // Initialize State
