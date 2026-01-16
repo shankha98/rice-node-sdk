@@ -20,14 +20,14 @@ const client = new Client();
 await client.connect();
 
 // --- Storage (RiceDB) ---
-// Insert a document
+// Insert data
 await client.storage.insert(
   "unique-node-id",
   "This is a piece of information stored in RiceDB.",
   { category: "example", value: 123 }
 );
 
-// Search for similar documents
+// Search for similar data
 const results = await client.storage.search("information stored", 1, 5);
 console.log(results);
 
@@ -51,34 +51,69 @@ console.log(memories);
 
 ## Configuration
 
-The SDK loads configuration from `rice.config.js` (or `.ts`/`.mjs`) and environment variables.
+The SDK loads configuration from `rice.config.js` (or `.ts`/`.mjs`), environment variables, and constructor options.
 
-### 1. Create `rice.config.js`
+### 1. Configuration File (`rice.config.js`)
+
+Control which services are enabled. Useful for applications that only need Storage or only need State.
 
 ```javascript
 /** @type {import('rice-node-sdk').RiceConfig} */
 module.exports = {
+  // Enable/Disable Storage (RiceDB)
   storage: {
-    enabled: true,
+    enabled: true, // Set to false if you only use State
   },
+  // Enable/Disable State (Memory)
   state: {
-    enabled: true,
+    enabled: true, // Set to false if you only use Storage
   },
 };
 ```
 
-### 2. Set Environment Variables (`.env`)
+### 2. Environment Variables (`.env`)
+
+Configure connection details and authentication.
 
 ```bash
-# Storage (RiceDB)
+# --- Storage (RiceDB) ---
+# URL of your RiceDB instance (default: localhost:50051)
 STORAGE_INSTANCE_URL=localhost:50051
+# Auth token (if enabled on server)
 STORAGE_AUTH_TOKEN=my-secret-token
+# User for auto-login (default: admin)
 STORAGE_USER=admin
 
-# State (Memory)
+# --- State (Memory) ---
+# URL of your State instance
 STATE_INSTANCE_URL=localhost:50051
+# Auth token
 STATE_AUTH_TOKEN=my-secret-token
+# Default Run ID for memory sessions (optional)
 STATE_RUN_ID=default-run-id
+```
+
+### 3. Advanced Configuration
+
+#### Custom Config Path
+
+You can load a specific config file by passing the path to the `Client` constructor.
+
+```typescript
+const client = new Client({ configPath: "./config/prod.rice.config.js" });
+```
+
+#### Managing Run IDs (Multi-User/Multi-Agent)
+
+For State memory, the `runId` determines the session or agent context. You can switch run IDs dynamically to manage memory for different users or agents.
+
+```typescript
+// Option A: Set globally in constructor
+const client = new Client({ runId: "user-123-session" });
+
+// Option B: Switch dynamically
+client.state.setRunId("user-456-session");
+await client.state.focus("New task for user 456");
 ```
 
 ## AI Tool Definitions
