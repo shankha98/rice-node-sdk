@@ -53,7 +53,7 @@ async function main() {
   console.log("[3] Executing recall...");
   const memories = await execute(
     "recall",
-    { query: "Tool Test" },
+    { query: `User input: ${content}` },
     client.state,
   );
   console.log(
@@ -61,6 +61,14 @@ async function main() {
   );
   if (Array.isArray(memories)) {
     memories.forEach((m: any) => console.log(` - ${m.input} -> ${m.outcome}`));
+
+    if (memories.length > 0 && memories[0].input === `User input: ${content}`) {
+      console.log("VERIFICATION PASSED: Retrieved newly inserted memory.");
+    } else {
+      console.log(
+        "VERIFICATION FAILED: Could not retrieve newly inserted memory.",
+      );
+    }
   }
 }
 main().catch(console.error);
