@@ -1,4 +1,9 @@
 import { Client } from "../../../dist";
+import * as dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 async function main() {
   const client = new Client();
@@ -22,7 +27,7 @@ async function main() {
     const success = await client.state.commit(
       "What is the test?",
       "Testing all memory types.",
-      { action: "test_action", agent_id: "state-app-agent" }
+      { action: "test_action", agent_id: "state-app-agent" },
     );
     console.log("Commit success:", success);
 

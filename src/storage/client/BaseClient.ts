@@ -18,6 +18,7 @@ export interface SearchResultItem {
   id: Long;
   similarity: number;
   metadata: any;
+  data?: string; // The stored text/data
 }
 
 export interface MemoryEntry {
@@ -48,7 +49,7 @@ export abstract class BaseRiceDBClient {
   abstract createUser(
     username: string,
     password: string,
-    role?: string
+    role?: string,
   ): Promise<Long>;
   abstract deleteUser(username: string): Promise<boolean>;
   abstract getUser(username: string): Promise<any>;
@@ -60,7 +61,7 @@ export abstract class BaseRiceDBClient {
     metadata: any,
     userId?: Long | number | string,
     sessionId?: string,
-    embedding?: number[]
+    embedding?: number[],
   ): Promise<InsertResult>;
 
   abstract search(
@@ -69,12 +70,12 @@ export abstract class BaseRiceDBClient {
     k?: number,
     sessionId?: string,
     filter?: { [key: string]: any },
-    queryEmbedding?: number[]
+    queryEmbedding?: number[],
   ): Promise<SearchResultItem[]>;
 
   abstract delete(
     nodeId: Long | number | string,
-    sessionId?: string
+    sessionId?: string,
   ): Promise<boolean>;
 
   // Cortex Session
@@ -83,7 +84,7 @@ export abstract class BaseRiceDBClient {
   abstract loadSession(path: string): Promise<string>;
   abstract commitSession(
     sessionId: string,
-    mergeStrategy?: string
+    mergeStrategy?: string,
   ): Promise<boolean>;
   abstract dropSession(sessionId: string): Promise<boolean>;
 
@@ -91,11 +92,11 @@ export abstract class BaseRiceDBClient {
   abstract writeMemory(
     address: BitVector,
     data: BitVector,
-    userId?: Long | number | string
+    userId?: Long | number | string,
   ): Promise<{ success: boolean; message: string }>;
   abstract readMemory(
     address: BitVector,
-    userId?: Long | number | string
+    userId?: Long | number | string,
   ): Promise<BitVector>;
 
   // Agent Memory
@@ -104,18 +105,18 @@ export abstract class BaseRiceDBClient {
     agentId: string,
     content: string,
     metadata?: { [key: string]: string },
-    ttlSeconds?: number
+    ttlSeconds?: number,
   ): Promise<{ success: boolean; message: string; entry: MemoryEntry }>;
 
   abstract getMemory(
     sessionId: string,
     limit?: number,
     after?: number | Long,
-    filter?: { [key: string]: string }
+    filter?: { [key: string]: string },
   ): Promise<MemoryEntry[]>;
 
   abstract clearMemory(
-    sessionId: string
+    sessionId: string,
   ): Promise<{ success: boolean; message: string }>;
   abstract watchMemory(sessionId: string): AsyncIterable<any>;
 
@@ -128,7 +129,7 @@ export abstract class BaseRiceDBClient {
     sourceId: Long | number | string,
     relation: string,
     targetId: Long | number | string,
-    weight: number = 1.0
+    weight: number = 1.0,
   ): Promise<boolean> {
     return this.addEdge(sourceId, targetId, relation, weight);
   }
@@ -137,15 +138,15 @@ export abstract class BaseRiceDBClient {
     fromNode: Long | number | string,
     toNode: Long | number | string,
     relation: string,
-    weight?: number
+    weight?: number,
   ): Promise<boolean>;
   abstract getNeighbors(
     nodeId: Long | number | string,
-    relation?: string
+    relation?: string,
   ): Promise<Long[]>;
   abstract traverse(
     startNode: Long | number | string,
-    maxDepth?: number
+    maxDepth?: number,
   ): Promise<Long[]>;
   abstract sampleGraph(limit?: number): Promise<any>;
 
@@ -154,12 +155,12 @@ export abstract class BaseRiceDBClient {
     filterType?: string,
     nodeId?: Long | number | string,
     queryText?: string,
-    threshold?: number
+    threshold?: number,
   ): AsyncIterable<any>;
 
   abstract batchInsert(
     documents: any[],
-    userId?: Long | number | string
+    userId?: Long | number | string,
   ): Promise<{ count: number; nodeIds: Long[] }>;
 
   /**
@@ -174,7 +175,7 @@ export abstract class BaseRiceDBClient {
     documents: any[],
     batchSize: number = 500,
     concurrency: number = 4,
-    userId?: Long | number | string
+    userId?: Long | number | string,
   ): Promise<{
     totalInserted: number;
     failedBatches: number;
@@ -236,16 +237,16 @@ export abstract class BaseRiceDBClient {
   abstract grantPermission(
     nodeId: Long | number | string,
     userId: Long | number | string,
-    permissions: { read?: boolean; write?: boolean; delete?: boolean }
+    permissions: { read?: boolean; write?: boolean; delete?: boolean },
   ): Promise<boolean>;
   abstract revokePermission(
     nodeId: Long | number | string,
-    userId: Long | number | string
+    userId: Long | number | string,
   ): Promise<boolean>;
   abstract checkPermission(
     nodeId: Long | number | string,
     userId: Long | number | string,
-    permissionType: string
+    permissionType: string,
   ): Promise<boolean>;
 
   abstract batchGrant(
@@ -253,7 +254,7 @@ export abstract class BaseRiceDBClient {
       nodeId: Long | number | string;
       userId: Long | number | string;
       permissions: { read?: boolean; write?: boolean; delete?: boolean };
-    }>
+    }>,
   ): Promise<{
     total: number;
     successful: number;
@@ -269,7 +270,7 @@ export abstract class BaseRiceDBClient {
     userPermissions: Array<{
       userId: Long | number | string;
       permissions: { read?: boolean; write?: boolean; delete?: boolean };
-    }>
+    }>,
   ): Promise<InsertResult>;
 
   // Helper to convert inputs to Long

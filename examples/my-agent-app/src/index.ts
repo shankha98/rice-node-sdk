@@ -1,4 +1,9 @@
 import { Client } from "../../../dist";
+import * as dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 import { state as anthropicTools } from "../../../dist/tools/anthropic";
 import { execute } from "../../../dist/tools/execute";
 
@@ -20,7 +25,7 @@ async function main() {
 
     // Verify definitions are loaded (just for demo)
     console.log(
-      `[Demo] Loaded ${anthropicTools.length} Anthropic tool definitions.`
+      `[Demo] Loaded ${anthropicTools.length} Anthropic tool definitions.`,
     );
 
     // Execute tool
@@ -38,7 +43,7 @@ async function main() {
     console.log(`[Tool] Result (Memories):`);
     if (Array.isArray(result2)) {
       result2.forEach((m: any) =>
-        console.log(` - ${m.content || JSON.stringify(m)}`)
+        console.log(` - ${m.content || JSON.stringify(m)}`),
       );
     } else {
       console.log(result2);

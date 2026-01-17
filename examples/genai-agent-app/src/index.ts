@@ -3,8 +3,9 @@ import { Client } from "../../../dist";
 import { state as googleTools } from "../../../dist/tools/google";
 import { execute } from "../../../dist/tools/execute";
 import * as dotenv from "dotenv";
-import * as path from "path";
+import path from "path";
 
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;

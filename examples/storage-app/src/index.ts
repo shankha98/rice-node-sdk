@@ -1,4 +1,9 @@
 import { Client } from "../../../dist";
+import * as dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 async function main() {
   const client = new Client();
@@ -17,7 +22,7 @@ async function main() {
     const insertResult = await client.storage.insert(
       nodeId,
       "Hello from Storage App",
-      { type: "example" }
+      { type: "example" },
     );
     console.log("Insert Result:", insertResult);
 

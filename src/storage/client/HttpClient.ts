@@ -45,9 +45,8 @@ export class HttpClient extends BaseRiceDBClient {
 
   private setAuthHeader() {
     if (this.token) {
-      this.client.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${this.token}`;
+      this.client.defaults.headers.common["Authorization"] =
+        `Bearer ${this.token}`;
     }
   }
 
@@ -55,7 +54,7 @@ export class HttpClient extends BaseRiceDBClient {
     method: string,
     url: string,
     data?: any,
-    params?: any
+    params?: any,
   ): Promise<T> {
     const res = await this.client.request({
       method,
@@ -66,7 +65,7 @@ export class HttpClient extends BaseRiceDBClient {
 
     if (res.status >= 400) {
       throw new Error(
-        `Request failed with status ${res.status}: ${JSON.stringify(res.data)}`
+        `Request failed with status ${res.status}: ${JSON.stringify(res.data)}`,
       );
     }
     return res.data;
@@ -90,12 +89,12 @@ export class HttpClient extends BaseRiceDBClient {
   async createUser(
     username: string,
     password: string,
-    role: string = "user"
+    role: string = "user",
   ): Promise<Long> {
     const res = await this.request<{ user_id: number }>(
       "POST",
       "/auth/create_user",
-      { username, password, role }
+      { username, password, role },
     );
     return Long.fromNumber(res.user_id);
   }
@@ -119,12 +118,18 @@ export class HttpClient extends BaseRiceDBClient {
     metadata: any,
     userId: Long | number | string = 1,
     sessionId?: string,
-    embedding?: number[]
+    embedding?: number[],
   ): Promise<InsertResult> {
+    // Automatically store text in metadata so it can be retrieved
+    const meta = { ...metadata };
+    if (text && !meta.stored_text) {
+      meta.stored_text = text;
+    }
+
     const payload: any = {
       id: this.toLong(nodeId).toNumber(),
       text,
-      metadata,
+      metadata: meta,
       user_id: this.toLong(userId).toNumber(),
     };
     if (sessionId) payload.session_id = sessionId;
@@ -147,7 +152,7 @@ export class HttpClient extends BaseRiceDBClient {
     k: number = 10,
     sessionId?: string,
     filter?: { [key: string]: any },
-    queryEmbedding?: number[]
+    queryEmbedding?: number[],
   ): Promise<SearchResultItem[]> {
     const payload: any = {
       query,
@@ -165,12 +170,13 @@ export class HttpClient extends BaseRiceDBClient {
       id: Long.fromValue(r.id),
       similarity: r.similarity,
       metadata: r.metadata,
+      data: r.metadata ? r.metadata.stored_text : undefined,
     }));
   }
 
   async delete(
     nodeId: Long | number | string,
-    sessionId?: string
+    sessionId?: string,
   ): Promise<boolean> {
     const params: any = {
       node_id: this.toLong(nodeId).toNumber(), // Use number or string? Try number first as insert uses number
@@ -182,7 +188,7 @@ export class HttpClient extends BaseRiceDBClient {
       "DELETE",
       `/node/${this.toLong(nodeId).toString()}`,
       undefined,
-      params
+      params,
     );
     return true;
   }
@@ -207,7 +213,7 @@ export class HttpClient extends BaseRiceDBClient {
 
   async commitSession(
     sessionId: string,
-    mergeStrategy: string = "overwrite"
+    mergeStrategy: string = "overwrite",
   ): Promise<boolean> {
     await this.request("POST", `/session/${sessionId}/commit`, {
       merge_strategy: mergeStrategy,
@@ -224,7 +230,7 @@ export class HttpClient extends BaseRiceDBClient {
   async writeMemory(
     address: BitVector,
     data: BitVector,
-    userId: Long | number | string = 1
+    userId: Long | number | string = 1,
   ): Promise<{ success: boolean; message: string }> {
     const res = await this.request<any>("POST", "/sdm/write", {
       address: address.toList().map((l) => l.toNumber()),
@@ -236,7 +242,7 @@ export class HttpClient extends BaseRiceDBClient {
 
   async readMemory(
     address: BitVector,
-    userId: Long | number | string = 1
+    userId: Long | number | string = 1,
   ): Promise<BitVector> {
     const res = await this.request<any>("POST", "/sdm/read", {
       address: address.toList().map((l) => l.toNumber()),
@@ -252,7 +258,7 @@ export class HttpClient extends BaseRiceDBClient {
     agentId: string,
     content: string,
     metadata: { [key: string]: string } = {},
-    ttlSeconds?: number
+    ttlSeconds?: number,
   ): Promise<{ success: boolean; message: string; entry: MemoryEntry }> {
     const payload: any = {
       agent_id: agentId,
@@ -264,7 +270,7 @@ export class HttpClient extends BaseRiceDBClient {
     const res = await this.request<any>(
       "POST",
       `/memory/${sessionId}`,
-      payload
+      payload,
     );
     return {
       success: res.success,
@@ -283,7 +289,7 @@ export class HttpClient extends BaseRiceDBClient {
     sessionId: string,
     limit: number = 50,
     after: number | Long = 0,
-    filter: { [key: string]: string } = {}
+    filter: { [key: string]: string } = {},
   ): Promise<MemoryEntry[]> {
     const params: any = { limit };
     if (after) params.after_timestamp = Long.fromValue(after).toNumber();
@@ -292,7 +298,7 @@ export class HttpClient extends BaseRiceDBClient {
       "GET",
       `/memory/${sessionId}`,
       undefined,
-      params
+      params,
     );
     const entries = res.entries || [];
     return entries.map((e: any) => ({
@@ -303,7 +309,7 @@ export class HttpClient extends BaseRiceDBClient {
   }
 
   async clearMemory(
-    sessionId: string
+    sessionId: string,
   ): Promise<{ success: boolean; message: string }> {
     const res = await this.request<any>("DELETE", `/memory/${sessionId}`);
     return { success: res.success, message: res.message || "" };
@@ -311,7 +317,7 @@ export class HttpClient extends BaseRiceDBClient {
 
   async *watchMemory(sessionId: string): AsyncIterable<any> {
     throw new Error(
-      "Watch memory is not supported via HTTP transport. Use gRPC."
+      "Watch memory is not supported via HTTP transport. Use gRPC.",
     );
   }
 
@@ -320,7 +326,7 @@ export class HttpClient extends BaseRiceDBClient {
     fromNode: Long | number | string,
     toNode: Long | number | string,
     relation: string,
-    weight: number = 1.0
+    weight: number = 1.0,
   ): Promise<boolean> {
     await this.request("POST", "/graph/edge", {
       from: this.toLong(fromNode).toNumber(),
@@ -333,7 +339,7 @@ export class HttpClient extends BaseRiceDBClient {
 
   async getNeighbors(
     nodeId: Long | number | string,
-    relation?: string
+    relation?: string,
   ): Promise<Long[]> {
     const payload: any = { node_id: this.toLong(nodeId).toNumber() };
     if (relation) payload.relation = relation;
@@ -344,7 +350,7 @@ export class HttpClient extends BaseRiceDBClient {
 
   async traverse(
     startNode: Long | number | string,
-    maxDepth: number = 1
+    maxDepth: number = 1,
   ): Promise<Long[]> {
     const res = await this.request<any>("POST", "/graph/traverse", {
       start: this.toLong(startNode).toNumber(),
@@ -361,14 +367,14 @@ export class HttpClient extends BaseRiceDBClient {
     filterType: string = "all",
     nodeId?: Long | number | string,
     queryText: string = "",
-    threshold: number = 0.8
+    threshold: number = 0.8,
   ): AsyncIterable<any> {
     throw new Error("Subscribe is not supported via HTTP transport. Use gRPC.");
   }
 
   async batchInsert(
     documents: any[],
-    userId: Long | number | string = 1
+    userId: Long | number | string = 1,
   ): Promise<{ count: number; nodeIds: Long[] }> {
     const payload = documents.map((doc) => ({
       id: this.toLong(doc.id).toNumber(),
@@ -390,7 +396,7 @@ export class HttpClient extends BaseRiceDBClient {
   async grantPermission(
     nodeId: Long | number | string,
     userId: Long | number | string,
-    permissions: { read?: boolean; write?: boolean; delete?: boolean }
+    permissions: { read?: boolean; write?: boolean; delete?: boolean },
   ): Promise<boolean> {
     await this.request("POST", "/acl/grant", {
       node_id: this.toLong(nodeId).toNumber(),
@@ -402,7 +408,7 @@ export class HttpClient extends BaseRiceDBClient {
 
   async revokePermission(
     nodeId: Long | number | string,
-    userId: Long | number | string
+    userId: Long | number | string,
   ): Promise<boolean> {
     await this.request("POST", "/acl/revoke", {
       node_id: this.toLong(nodeId).toNumber(),
@@ -414,7 +420,7 @@ export class HttpClient extends BaseRiceDBClient {
   async checkPermission(
     nodeId: Long | number | string,
     userId: Long | number | string,
-    permissionType: string
+    permissionType: string,
   ): Promise<boolean> {
     const res = await this.request<any>("POST", "/acl/check", {
       node_id: this.toLong(nodeId).toNumber(),
@@ -429,7 +435,7 @@ export class HttpClient extends BaseRiceDBClient {
       nodeId: Long | number | string;
       userId: Long | number | string;
       permissions: { read?: boolean; write?: boolean; delete?: boolean };
-    }>
+    }>,
   ): Promise<{
     total: number;
     successful: number;
@@ -446,7 +452,7 @@ export class HttpClient extends BaseRiceDBClient {
         const success = await this.grantPermission(
           grant.nodeId,
           grant.userId,
-          grant.permissions
+          grant.permissions,
         );
         results.push({
           index: i,
@@ -481,7 +487,7 @@ export class HttpClient extends BaseRiceDBClient {
     userPermissions: Array<{
       userId: Long | number | string;
       permissions: { read?: boolean; write?: boolean; delete?: boolean };
-    }>
+    }>,
   ): Promise<InsertResult> {
     if (!userPermissions || userPermissions.length === 0) {
       throw new Error("At least one user permission must be provided");

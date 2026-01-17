@@ -20,7 +20,7 @@ export class GrpcClient extends BaseRiceDBClient {
   constructor(
     host: string = "localhost",
     port: number = 50051,
-    token?: string
+    token?: string,
   ) {
     super(host, port);
     if (token) {
@@ -71,7 +71,7 @@ export class GrpcClient extends BaseRiceDBClient {
         (err: any, res: TRes) => {
           if (err) reject(err);
           else resolve(res);
-        }
+        },
       );
     });
   }
@@ -92,7 +92,7 @@ export class GrpcClient extends BaseRiceDBClient {
   async createUser(
     username: string,
     password: string,
-    role: string = "user"
+    role: string = "user",
   ): Promise<Long> {
     if (!this.client) throw new Error("Not connected");
     const res = await this.promisify(this.client.createUser, {
@@ -115,7 +115,7 @@ export class GrpcClient extends BaseRiceDBClient {
 
   async listUsers(): Promise<any[]> {
     throw new Error(
-      "List users is not supported via gRPC transport. Use HTTP."
+      "List users is not supported via gRPC transport. Use HTTP.",
     );
   }
 
@@ -125,13 +125,20 @@ export class GrpcClient extends BaseRiceDBClient {
     metadata: any,
     userId: Long | number | string = 1,
     sessionId?: string,
-    embedding?: number[]
+    embedding?: number[],
   ): Promise<InsertResult> {
     if (!this.client) throw new Error("Not connected");
+
+    // Automatically store text in metadata so it can be retrieved
+    const meta = { ...metadata };
+    if (text && !meta.stored_text) {
+      meta.stored_text = text;
+    }
+
     const req = {
       id: this.toLong(nodeId),
       text,
-      metadata: Buffer.from(JSON.stringify(metadata)),
+      metadata: Buffer.from(JSON.stringify(meta)),
       userId: this.toLong(userId),
       sessionId,
       embedding: embedding || [],
@@ -146,7 +153,7 @@ export class GrpcClient extends BaseRiceDBClient {
     k: number = 10,
     sessionId?: string,
     filter?: { [key: string]: any },
-    queryEmbedding?: number[]
+    queryEmbedding?: number[],
   ): Promise<SearchResultItem[]> {
     if (!this.client) throw new Error("Not connected");
     const req = {
@@ -158,16 +165,20 @@ export class GrpcClient extends BaseRiceDBClient {
       queryEmbedding: queryEmbedding || [],
     };
     const res: any = await this.promisify(this.client.search, req);
-    return res.results.map((r: any) => ({
-      id: r.id,
-      similarity: r.similarity,
-      metadata: JSON.parse(r.metadata.toString()),
-    }));
+    return res.results.map((r: any) => {
+      const meta = JSON.parse(r.metadata.toString());
+      return {
+        id: r.id,
+        similarity: r.similarity,
+        metadata: meta,
+        data: meta.stored_text,
+      };
+    });
   }
 
   async delete(
     nodeId: Long | number | string,
-    sessionId?: string
+    sessionId?: string,
   ): Promise<boolean> {
     if (!this.client) throw new Error("Not connected");
     const res: any = await this.promisify(this.client.deleteNode, {
@@ -202,7 +213,7 @@ export class GrpcClient extends BaseRiceDBClient {
 
   async commitSession(
     sessionId: string,
-    mergeStrategy: string = "overwrite"
+    mergeStrategy: string = "overwrite",
   ): Promise<boolean> {
     if (!this.client) throw new Error("Not connected");
     const res: any = await this.promisify(this.client.commitSession, {
@@ -223,7 +234,7 @@ export class GrpcClient extends BaseRiceDBClient {
   async writeMemory(
     address: BitVector,
     data: BitVector,
-    userId: Long | number | string = 1
+    userId: Long | number | string = 1,
   ): Promise<{ success: boolean; message: string }> {
     if (!this.client) throw new Error("Not connected");
     const req = {
@@ -237,7 +248,7 @@ export class GrpcClient extends BaseRiceDBClient {
 
   async readMemory(
     address: BitVector,
-    userId: Long | number | string = 1
+    userId: Long | number | string = 1,
   ): Promise<BitVector> {
     if (!this.client) throw new Error("Not connected");
     const req = {
@@ -253,7 +264,7 @@ export class GrpcClient extends BaseRiceDBClient {
     agentId: string,
     content: string,
     metadata: { [key: string]: string } = {},
-    ttlSeconds?: number
+    ttlSeconds?: number,
   ): Promise<{ success: boolean; message: string; entry: MemoryEntry }> {
     if (!this.client) throw new Error("Not connected");
     const req = { sessionId, agentId, content, metadata, ttlSeconds };
@@ -265,7 +276,7 @@ export class GrpcClient extends BaseRiceDBClient {
     sessionId: string,
     limit: number = 50,
     after: number | Long = 0,
-    filter: { [key: string]: string } = {}
+    filter: { [key: string]: string } = {},
   ): Promise<MemoryEntry[]> {
     if (!this.client) throw new Error("Not connected");
     const req = {
@@ -279,7 +290,7 @@ export class GrpcClient extends BaseRiceDBClient {
   }
 
   async clearMemory(
-    sessionId: string
+    sessionId: string,
   ): Promise<{ success: boolean; message: string }> {
     if (!this.client) throw new Error("Not connected");
     const res: any = await this.promisify(this.client.clearMemory, {
@@ -301,7 +312,7 @@ export class GrpcClient extends BaseRiceDBClient {
     fromNode: Long | number | string,
     toNode: Long | number | string,
     relation: string,
-    weight: number = 1.0
+    weight: number = 1.0,
   ): Promise<boolean> {
     if (!this.client) throw new Error("Not connected");
     const req = {
@@ -316,7 +327,7 @@ export class GrpcClient extends BaseRiceDBClient {
 
   async getNeighbors(
     nodeId: Long | number | string,
-    relation?: string
+    relation?: string,
   ): Promise<Long[]> {
     if (!this.client) throw new Error("Not connected");
     const req = { nodeId: this.toLong(nodeId), relation };
@@ -326,7 +337,7 @@ export class GrpcClient extends BaseRiceDBClient {
 
   async traverse(
     startNode: Long | number | string,
-    maxDepth: number = 1
+    maxDepth: number = 1,
   ): Promise<Long[]> {
     if (!this.client) throw new Error("Not connected");
     const req = { start: this.toLong(startNode), maxDepth };
@@ -336,7 +347,7 @@ export class GrpcClient extends BaseRiceDBClient {
 
   async sampleGraph(limit: number = 100): Promise<any> {
     throw new Error(
-      "Sample graph is not supported via gRPC transport. Use HTTP."
+      "Sample graph is not supported via gRPC transport. Use HTTP.",
     );
   }
 
@@ -344,7 +355,7 @@ export class GrpcClient extends BaseRiceDBClient {
     filterType: string = "all",
     nodeId?: Long | number | string,
     queryText: string = "",
-    threshold: number = 0.8
+    threshold: number = 0.8,
   ): AsyncIterable<any> {
     if (!this.client) throw new Error("Not connected");
     const req = {
@@ -370,7 +381,7 @@ export class GrpcClient extends BaseRiceDBClient {
 
   async batchInsert(
     documents: any[],
-    userId: Long | number | string = 1
+    userId: Long | number | string = 1,
   ): Promise<{ count: number; nodeIds: Long[] }> {
     if (!this.client) throw new Error("Not connected");
 
@@ -381,7 +392,7 @@ export class GrpcClient extends BaseRiceDBClient {
         (err: any, res: any) => {
           if (err) reject(err);
           else resolve({ count: res.count, nodeIds: res.nodeIds });
-        }
+        },
       );
 
       for (const doc of documents) {
@@ -407,7 +418,7 @@ export class GrpcClient extends BaseRiceDBClient {
   async grantPermission(
     nodeId: Long | number | string,
     userId: Long | number | string,
-    permissions: { read?: boolean; write?: boolean; delete?: boolean }
+    permissions: { read?: boolean; write?: boolean; delete?: boolean },
   ): Promise<boolean> {
     if (!this.client) throw new Error("Not connected");
     const req = {
@@ -425,7 +436,7 @@ export class GrpcClient extends BaseRiceDBClient {
 
   async revokePermission(
     nodeId: Long | number | string,
-    userId: Long | number | string
+    userId: Long | number | string,
   ): Promise<boolean> {
     if (!this.client) throw new Error("Not connected");
     const req = {
@@ -439,10 +450,10 @@ export class GrpcClient extends BaseRiceDBClient {
   async checkPermission(
     nodeId: Long | number | string,
     userId: Long | number | string,
-    permissionType: string
+    permissionType: string,
   ): Promise<boolean> {
     console.warn(
-      `checkPermission not supported via gRPC, assuming false for ${nodeId}`
+      `checkPermission not supported via gRPC, assuming false for ${nodeId}`,
     );
     return false;
   }
@@ -452,7 +463,7 @@ export class GrpcClient extends BaseRiceDBClient {
       nodeId: Long | number | string;
       userId: Long | number | string;
       permissions: { read?: boolean; write?: boolean; delete?: boolean };
-    }>
+    }>,
   ): Promise<{
     total: number;
     successful: number;
@@ -469,7 +480,7 @@ export class GrpcClient extends BaseRiceDBClient {
         const success = await this.grantPermission(
           grant.nodeId,
           grant.userId,
-          grant.permissions
+          grant.permissions,
         );
         results.push({
           index: i,
@@ -504,7 +515,7 @@ export class GrpcClient extends BaseRiceDBClient {
     userPermissions: Array<{
       userId: Long | number | string;
       permissions: { read?: boolean; write?: boolean; delete?: boolean };
-    }>
+    }>,
   ): Promise<InsertResult> {
     if (!userPermissions || userPermissions.length === 0) {
       throw new Error("At least one user permission must be provided");

@@ -32,7 +32,12 @@ async function main() {
 
     console.log("Searching...");
     const results = await client.storage.search("remote test", 5);
-    console.log("Search results:", results);
+    console.log("Search results:");
+    results.forEach((r) => {
+      console.log(`- ID: ${r.id}, Score: ${r.similarity}`);
+      console.log(`  Data: ${r.data}`);
+      console.log(`  Metadata:`, r.metadata);
+    });
 
     console.log("Deleting document:", id);
     await client.storage.delete(id);
