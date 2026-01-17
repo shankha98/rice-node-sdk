@@ -6,12 +6,14 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 async function main() {
-  // Use a fixed Run ID so memories persist across executions.
-  // This ensures that subsequent runs can find memories committed in previous runs.
-  const runId = "basic-state-example";
+  // Use "default" Run ID to match the working state.ts example which has pre-seeded data
+  const runId = "default";
   console.log(`Run ID: ${runId}`);
 
-  const client = new Client({ runId });
+  const client = new Client({
+    runId,
+    configPath: path.resolve(__dirname, "../tests/remote/rice.state.config.js"),
+  });
   await client.connect();
 
   // 1. Focus
@@ -30,11 +32,10 @@ async function main() {
   // 2. Commit a trace
   try {
     console.log("\n[2] Committing interaction trace...");
-    const success = await client.state.commit(
-      "What is the status?",
-      "All systems operational.",
-      { action: "check_status", agent_id: "test-agent" },
-    );
+    const success = await client.state.commit("Remote input", "Remote output", {
+      action: "check_status",
+      agent_id: "test-agent",
+    });
     console.log(`Commit success: ${success}`);
   } catch (e) {
     console.error("Commit failed:", e);
@@ -46,7 +47,8 @@ async function main() {
 
     // No wait needed if we expect to find memories from previous runs.
     // Newly committed memories might still take a moment to appear.
-    const memories = await client.state.reminisce("status");
+    // Use a query known to exist in "default" run (from tests/remote/state.ts)
+    const memories = await client.state.reminisce("Remote input");
     console.log(`Found ${memories.length} relevant memories.`);
     console.log("Memories:", memories);
   } catch (e) {

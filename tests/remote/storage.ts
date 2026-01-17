@@ -25,13 +25,21 @@ async function main() {
 
     const id = Date.now().toString();
     console.log("Inserting document:", id);
+    const runId = "run-" + id;
     await client.storage.insert(id, "This is a remote test document.", {
       source: "test-script",
+      run_id: runId,
     });
-    console.log("Insert successful.");
+    console.log("Insert successful. RunID:", runId);
 
-    console.log("Searching...");
-    const results = await client.storage.search("remote test", 5);
+    console.log("Searching with filter...");
+    const results = await client.storage.search(
+      "remote test",
+      1,
+      5,
+      undefined,
+      { run_id: runId },
+    );
     console.log("Search results:");
     results.forEach((r) => {
       console.log(`- ID: ${r.id}, Score: ${r.similarity}`);

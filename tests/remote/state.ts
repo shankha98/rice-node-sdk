@@ -9,8 +9,17 @@ async function main() {
   console.log("Testing Remote State Connection...");
   console.log("URL:", process.env.STATE_INSTANCE_URL);
 
+  const timestamp = Date.now();
+  const runId = `test-run-${timestamp}`;
+  const input = `Remote input ${timestamp}`;
+  const output = `Remote output ${timestamp}`;
+
+  console.log(`Using Run ID: ${runId}`);
+  console.log(`Using Input: ${input}`);
+
   const client = new Client({
     configPath: path.join(__dirname, "rice.state.config.js"),
+    runId: runId,
   });
 
   try {
@@ -18,18 +27,30 @@ async function main() {
     console.log("Connected!");
 
     console.log("Focusing...");
-    await client.state.focus("Remote test focus");
+    await client.state.focus(`Remote test focus ${timestamp}`);
     console.log("Focus successful.");
 
     console.log("Committing...");
-    await client.state.commit("Remote input", "Remote output", {
+    await client.state.commit(input, output, {
       reasoning: "test",
     });
     console.log("Commit successful.");
 
+    console.log("Waiting 3s for indexing...");
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
     console.log("Reminiscing...");
-    const memories = await client.state.reminisce("Remote input");
+    const memories = await client.state.reminisce(input);
+    console.log(`Found ${memories.length} memories.`);
     console.log("Memories:", memories);
+
+    if (memories.length > 0 && memories[0].input === input) {
+      console.log("VERIFICATION PASSED: Retrieved newly inserted memory.");
+    } else {
+      console.log(
+        "VERIFICATION FAILED: Could not retrieve newly inserted memory.",
+      );
+    }
   } catch (error) {
     console.error("State Test Failed:", error);
   }

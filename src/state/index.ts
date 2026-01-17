@@ -24,7 +24,7 @@ export class StateClient {
   constructor(
     address: string = "localhost:50051",
     token?: string,
-    runId: string = "default"
+    runId: string = "default",
   ) {
     const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
       keepCase: true,
@@ -34,7 +34,7 @@ export class StateClient {
       oneofs: true,
     });
     const protoDescriptor = grpc.loadPackageDefinition(
-      packageDefinition
+      packageDefinition,
     ) as any;
 
     // Internal usage: The proto package is still 'slate' for compatibility
@@ -69,7 +69,7 @@ export class StateClient {
         (err: any, response: any) => {
           if (err) reject(err);
           else resolve(response.id);
-        }
+        },
       );
     });
   }
@@ -86,7 +86,7 @@ export class StateClient {
         (err: any, response: any) => {
           if (err) reject(err);
           else resolve(response.items || []);
-        }
+        },
       );
     });
   }
@@ -101,7 +101,7 @@ export class StateClient {
   commit(
     input: string,
     outcome: string,
-    options?: { action?: string; reasoning?: string; agent_id?: string }
+    options?: { action?: string; reasoning?: string; agent_id?: string },
   ): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const trace = {
@@ -124,15 +124,21 @@ export class StateClient {
    * Recalls past memories relevant to a query.
    * @param query - The query text to search for memories.
    * @param limit - Maximum number of memories to retrieve. Defaults to 5.
+   * @param filter - Optional metadata filter.
    * @returns A promise that resolves to an array of traces/memories.
    */
-  reminisce(query: string, limit: number = 5): Promise<any[]> {
+  reminisce(
+    query: string,
+    limit: number = 5,
+    filter?: { [key: string]: any },
+  ): Promise<any[]> {
     return new Promise((resolve, reject) => {
       const req = {
         embedding: [],
         limit,
         query_text: query,
         run_id: this.runId,
+        filter: filter ? JSON.stringify(filter) : undefined,
       };
       this.client.Reminisce(req, this.metadata, (err: any, response: any) => {
         if (err) reject(err);
@@ -170,7 +176,7 @@ export class StateClient {
         (err: any, response: any) => {
           if (err) reject(err);
           else resolve(response.success);
-        }
+        },
       );
     });
   }
