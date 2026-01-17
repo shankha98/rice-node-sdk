@@ -2,19 +2,21 @@ import { Client } from "../../../dist";
 import * as dotenv from "dotenv";
 import path from "path";
 
-dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+// Load .env from tests/remote to ensure identical config
+dotenv.config({ path: path.resolve(__dirname, "../../../tests/remote/.env") });
 import { execute } from "../../../dist/tools/execute";
 import * as crypto from "crypto";
 
 async function main() {
-  const client = new Client();
-  await client.connect();
-
-  // Random run ID
-  const runId = crypto.randomUUID();
+  const timestamp = Date.now();
+  const runId = `tool-test-run-${timestamp}`;
   console.log(`Run ID: ${runId}`);
-  client.state.setRunId(runId);
+
+  const client = new Client({
+    runId,
+    configPath: path.resolve(__dirname, "../rice.config.js"),
+  });
+  await client.connect();
 
   const content = `Tool Test Content ${runId}`;
 
@@ -32,7 +34,7 @@ async function main() {
 
   // 2. Remember (Commit) -> Should affect Reminisce
   console.log("[2] Executing remember...");
-  await execute(
+  const remResult = await execute(
     "remember",
     {
       input: `User input: ${content}`,
@@ -41,9 +43,11 @@ async function main() {
     },
     client.state,
   );
+  console.log("Remember result:", remResult);
 
   // Wait for indexing
-  await new Promise((r) => setTimeout(r, 2000));
+  console.log("Waiting 3s for indexing...");
+  await new Promise((r) => setTimeout(r, 3000));
 
   // 3. Recall (Reminisce) -> Should find the saved experience
   console.log("[3] Executing recall...");

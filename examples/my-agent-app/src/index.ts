@@ -2,13 +2,20 @@ import { Client } from "../../../dist";
 import * as dotenv from "dotenv";
 import path from "path";
 
-dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+// Load .env from tests/remote to ensure identical config
+dotenv.config({ path: path.resolve(__dirname, "../../../tests/remote/.env") });
 import { state as anthropicTools } from "../../../dist/tools/anthropic";
 import { execute } from "../../../dist/tools/execute";
 
 async function main() {
-  const client = new Client();
+  const timestamp = Date.now();
+  const runId = `my-agent-run-${timestamp}`;
+  console.log(`Run ID: ${runId}`);
+
+  const client = new Client({
+    runId,
+    configPath: path.resolve(__dirname, "../rice.config.js"),
+  });
 
   try {
     console.log("Connecting to Rice...");

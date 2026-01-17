@@ -5,7 +5,8 @@ import { execute } from "../../../dist/tools/execute";
 import * as dotenv from "dotenv";
 import path from "path";
 
-dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+// Load .env from tests/remote for SDK config, and local .env for API keys
+dotenv.config({ path: path.resolve(__dirname, "../../../tests/remote/.env") });
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -16,7 +17,9 @@ async function main() {
     return;
   }
 
-  const client = new Client();
+  const client = new Client({
+    configPath: path.resolve(__dirname, "../rice.config.js"),
+  });
   try {
     console.log("Connecting to Rice...");
     await client.connect();
