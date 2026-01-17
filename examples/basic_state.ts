@@ -1,59 +1,59 @@
-import { Client } from "../dist";
+import { Client } from "../src/Client";
 import * as dotenv from "dotenv";
-import path from "path";
+import * as path from "path";
 
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
-dotenv.config({ path: path.resolve(__dirname, ".env") });
+// Load .env from tests/remote to ensure identical config
+dotenv.config({ path: path.resolve(__dirname, "../tests/remote/.env") });
 
 async function main() {
-  // Use "default" Run ID to match the working state.ts example which has pre-seeded data
-  const runId = "default";
-  console.log(`Run ID: ${runId}`);
+  console.log("Testing Remote State Connection...");
+  console.log("URL:", process.env.STATE_INSTANCE_URL);
+
+  const timestamp = Date.now();
+  const runId = `test-run-${timestamp}`;
+  const input = `Remote input ${timestamp}`;
+  const output = `Remote output ${timestamp}`;
+
+  console.log(`Using Run ID: ${runId}`);
+  console.log(`Using Input: ${input}`);
 
   const client = new Client({
-    runId,
     configPath: path.resolve(__dirname, "../tests/remote/rice.state.config.js"),
+    runId: runId,
   });
-  await client.connect();
 
-  // 1. Focus
   try {
-    console.log("\n[1] Focusing on task...");
-    const focusId = await client.state.focus(
-      "Testing SDK integration for State",
-    );
-    console.log(`Success. Focus ID: ${focusId}`);
-  } catch (e) {
-    console.error("Focus failed (is the server running?):", e);
-    // If we can't connect, no point continuing
-    process.exit(1);
-  }
+    await client.connect();
+    console.log("Connected!");
 
-  // 2. Commit a trace
-  try {
-    console.log("\n[2] Committing interaction trace...");
-    const success = await client.state.commit("Remote input", "Remote output", {
-      action: "check_status",
-      agent_id: "test-agent",
+    console.log("Focusing...");
+    await client.state.focus(`Remote test focus ${timestamp}`);
+    console.log("Focus successful.");
+
+    console.log("Committing...");
+    await client.state.commit(input, output, {
+      reasoning: "test",
     });
-    console.log(`Commit success: ${success}`);
-  } catch (e) {
-    console.error("Commit failed:", e);
-  }
+    console.log("Commit successful.");
 
-  // 3. Reminisce (Search)
-  try {
-    console.log("\n[3] Reminiscing (Searching)...");
+    console.log("Waiting 3s for indexing...");
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
-    // No wait needed if we expect to find memories from previous runs.
-    // Newly committed memories might still take a moment to appear.
-    // Use a query known to exist in "default" run (from tests/remote/state.ts)
-    const memories = await client.state.reminisce("Remote input");
-    console.log(`Found ${memories.length} relevant memories.`);
+    console.log("Reminiscing...");
+    const memories = await client.state.reminisce(input);
+    console.log(`Found ${memories.length} memories.`);
     console.log("Memories:", memories);
-  } catch (e) {
-    console.error("Reminisce failed:", e);
+
+    if (memories.length > 0 && memories[0].input === input) {
+      console.log("VERIFICATION PASSED: Retrieved newly inserted memory.");
+    } else {
+      console.log(
+        "VERIFICATION FAILED: Could not retrieve newly inserted memory.",
+      );
+    }
+  } catch (error) {
+    console.error("State Test Failed:", error);
   }
 }
 
-main().catch(console.error);
+main();
