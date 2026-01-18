@@ -1,0 +1,18 @@
+{
+    "name": "cognitive-agent-app",
+    "version": "1.0.0",
+    "description": "Example demonstrating cognitive agent features with decision cycles and goal management",
+    "main": "src/index.ts",
+    "scripts": {
+        "start": "npx ts-node src/index.ts"
+    },
+    "dependencies": {
+        "rice-node-sdk": "file:../../..",
+        "dotenv": "^16.0.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.0.0",
+        "ts-node": "^10.9.0",
+        "@types/node": "^20.0.0"
+    }
+}

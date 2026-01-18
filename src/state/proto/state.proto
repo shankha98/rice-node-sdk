@@ -2,19 +2,42 @@ syntax = "proto3";
 package slate;
 
 service Cortex {
-  // Flux
+  // Flux (Legacy Working Memory)
   rpc Focus(FocusRequest) returns (FocusResponse);
   rpc Drift(DriftRequest) returns (DriftResponse);
 
-  // Echoes
+  // Echoes (Episodic Memory)
   rpc Commit(Trace) returns (Ack);
   rpc Reminisce(RecallRequest) returns (RecallResponse);
 
-  // Nexus
+  // Nexus (Semantic Memory)
   rpc Consult(QueryRequest) returns (KnowledgeResponse);
 
-  // Reflex
+  // Reflex (Procedural Memory)
   rpc Trigger(ReflexRequest) returns (ExecutionResult);
+
+  // Working Memory (Structured Variables)
+  rpc SetVariable(SetVariableRequest) returns (Ack);
+  rpc GetVariable(GetVariableRequest) returns (VariableResponse);
+  rpc ListVariables(ListVariablesRequest) returns (ListVariablesResponse);
+  rpc DeleteVariable(DeleteVariableRequest) returns (Ack);
+
+  // Concepts (Level 4 Agency)
+  rpc DefineConcept(DefineConceptRequest) returns (Ack);
+  rpc ListConcepts(ListConceptsRequest) returns (ListConceptsResponse);
+
+  // Goals
+  rpc AddGoal(AddGoalRequest) returns (GoalResponse);
+  rpc UpdateGoal(UpdateGoalRequest) returns (Ack);
+  rpc ListGoals(ListGoalsRequest) returns (ListGoalsResponse);
+
+  // Actions
+  rpc SubmitAction(ActionRequest) returns (ActionResponse);
+  rpc GetActionLog(ActionLogRequest) returns (ActionLogResponse);
+
+  // Decision Cycle
+  rpc RunCycle(RunCycleRequest) returns (CycleResponse);
+  rpc GetCycleHistory(CycleHistoryRequest) returns (CycleHistoryResponse);
 
   // Management
   rpc DeleteRun(RunRequest) returns (Ack);
@@ -97,4 +120,175 @@ message ReflexRequest {
 
 message ExecutionResult {
   int32 result = 1;
+}
+
+// =============================================================================
+// Working Memory (Structured Variables)
+// =============================================================================
+
+message SetVariableRequest {
+  string run_id = 1;
+  string name = 2;
+  string value_json = 3;  // JSON-encoded value
+  string source = 4;      // "system", "reasoning", "retrieval", "perception", "explicit"
+}
+
+message GetVariableRequest {
+  string run_id = 1;
+  string name = 2;
+}
+
+message VariableResponse {
+  string name = 1;
+  string value_json = 2;
+  string var_type = 3;
+  string created_at = 4;
+  string last_updated = 5;
+  uint64 access_count = 6;
+  string source = 7;
+}
+
+message ListVariablesRequest {
+  string run_id = 1;
+}
+
+message ListVariablesResponse {
+  repeated VariableResponse variables = 1;
+}
+
+message DeleteVariableRequest {
+  string run_id = 1;
+  string name = 2;
+}
+
+// =============================================================================
+// Concepts (Level 4 Agency)
+// =============================================================================
+
+message DefineConceptRequest {
+  string run_id = 1;
+  string name = 2;
+  string schema_json = 3;
+}
+
+message ListConceptsRequest {
+  string run_id = 1;
+}
+
+message Concept {
+  string name = 1;
+  string schema_json = 2;
+}
+
+message ListConceptsResponse {
+  repeated Concept concepts = 1;
+}
+
+// =============================================================================
+// Goals
+// =============================================================================
+
+message AddGoalRequest {
+  string run_id = 1;
+  string description = 2;
+  string priority = 3;    // "low", "medium", "high", "critical"
+  string parent_id = 4;   // Optional parent goal ID
+}
+
+message GoalResponse {
+  string id = 1;
+  string description = 2;
+  string priority = 3;
+  string status = 4;
+  string parent_id = 5;
+  string created_at = 6;
+}
+
+message UpdateGoalRequest {
+  string run_id = 1;
+  string goal_id = 2;
+  string status = 3;      // "active", "suspended", "achieved", "abandoned", "failed"
+}
+
+message ListGoalsRequest {
+  string run_id = 1;
+  string status_filter = 2;  // Optional: filter by status
+}
+
+message ListGoalsResponse {
+  repeated GoalResponse goals = 1;
+}
+
+// =============================================================================
+// Actions
+// =============================================================================
+
+message ActionRequest {
+  string run_id = 1;
+  string agent_id = 2;
+  string action_type = 3;  // "reason", "retrieve", "learn", "ground"
+  string action_json = 4;  // JSON-encoded action details
+}
+
+message ActionResponse {
+  string action_id = 1;
+  bool success = 2;
+  string result_json = 3;
+  string error = 4;
+  uint64 duration_ms = 5;
+}
+
+message ActionLogRequest {
+  string run_id = 1;
+  uint64 limit = 2;
+  string action_type_filter = 3;  // Optional
+}
+
+message ActionLogResponse {
+  repeated ActionLogEntry entries = 1;
+}
+
+message ActionLogEntry {
+  string action_id = 1;
+  string action_type = 2;
+  string action_json = 3;
+  bool success = 4;
+  string result_json = 5;
+  uint64 cycle_number = 6;
+  string timestamp = 7;
+}
+
+// =============================================================================
+// Decision Cycle
+// =============================================================================
+
+message RunCycleRequest {
+  string run_id = 1;
+  string agent_id = 2;
+  repeated ActionCandidate candidates = 3;  // Optional: pre-proposed candidates
+}
+
+message ActionCandidate {
+  string action_type = 1;
+  string action_json = 2;
+  float score = 3;
+  string rationale = 4;
+}
+
+message CycleResponse {
+  uint64 cycle_number = 1;
+  ActionCandidate selected_action = 2;
+  ActionResponse action_result = 3;
+  uint64 planning_time_ms = 4;
+  uint64 execution_time_ms = 5;
+  string timestamp = 6;
+}
+
+message CycleHistoryRequest {
+  string run_id = 1;
+  uint64 limit = 2;
+}
+
+message CycleHistoryResponse {
+  repeated CycleResponse cycles = 1;
 }
