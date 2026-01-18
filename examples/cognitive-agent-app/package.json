@@ -1,14 +1,15 @@
 {
     "name": "cognitive-agent-app",
     "version": "1.0.0",
-    "description": "Example demonstrating cognitive agent features with decision cycles and goal management",
+    "description": "AI agent with Google Gemini and Rice memory tools",
     "main": "src/index.ts",
     "scripts": {
         "start": "npx ts-node src/index.ts"
     },
     "dependencies": {
         "rice-node-sdk": "file:../../..",
-        "dotenv": "^16.0.0"
+        "dotenv": "^16.0.0",
+        "@google/genai": "^1.37.0"
     },
     "devDependencies": {
         "typescript": "^5.0.0",

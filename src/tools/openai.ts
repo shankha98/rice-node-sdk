@@ -227,4 +227,122 @@ export const state = [
       },
     },
   },
+  // Drift (Read Working Memory)
+  {
+    type: "function",
+    function: {
+      name: "drift",
+      description:
+        "Reads the current items in short-term working memory (Flux).",
+      parameters: {
+        type: "object",
+        properties: {},
+      },
+    },
+  },
+  // Concepts
+  {
+    type: "function",
+    function: {
+      name: "defineConcept",
+      description:
+        "Defines a concept with a JSON schema for structured knowledge.",
+      parameters: {
+        type: "object",
+        properties: {
+          name: {
+            type: "string",
+            description: "The name of the concept.",
+          },
+          schema: {
+            description: "The JSON schema defining the concept structure.",
+          },
+        },
+        required: ["name", "schema"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "listConcepts",
+      description: "Lists all defined concepts and their schemas.",
+      parameters: {
+        type: "object",
+        properties: {},
+      },
+    },
+  },
+  // Decision Cycles
+  {
+    type: "function",
+    function: {
+      name: "runCycle",
+      description:
+        "Runs a decision cycle with optional action candidates. The system will select and execute the best action.",
+      parameters: {
+        type: "object",
+        properties: {
+          agentId: {
+            type: "string",
+            description: "The ID of the agent running the cycle.",
+          },
+          candidates: {
+            type: "array",
+            description: "Optional array of action candidates with scores.",
+            items: {
+              type: "object",
+              properties: {
+                actionType: { type: "string", description: "Type of action." },
+                action: { description: "The action details." },
+                score: {
+                  type: "number",
+                  description: "Score between 0 and 1.",
+                },
+                rationale: {
+                  type: "string",
+                  description: "Explanation for this candidate.",
+                },
+              },
+            },
+          },
+        },
+        required: ["agentId"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "getCycleHistory",
+      description: "Gets the history of decision cycles for the current run.",
+      parameters: {
+        type: "object",
+        properties: {
+          limit: {
+            type: "number",
+            description: "Maximum number of cycles to retrieve.",
+          },
+        },
+      },
+    },
+  },
+  // Skills
+  {
+    type: "function",
+    function: {
+      name: "trigger",
+      description: "Triggers a registered skill or procedure by name.",
+      parameters: {
+        type: "object",
+        properties: {
+          skillName: {
+            type: "string",
+            description: "The name of the skill to trigger.",
+          },
+        },
+        required: ["skillName"],
+      },
+    },
+  },
 ];

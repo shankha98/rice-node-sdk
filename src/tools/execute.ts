@@ -5,6 +5,8 @@ export async function execute(name: string, args: any, client: StateClient) {
     // Core Memory Operations
     case "focus":
       return await client.focus(args.content);
+    case "drift":
+      return await client.drift();
     case "recall":
       return await client.reminisce(args.query);
     case "remember":
@@ -16,6 +18,8 @@ export async function execute(name: string, args: any, client: StateClient) {
       return await client.commit(args.input, args.outcome, {
         action: args.action,
       });
+    case "trigger":
+      return await client.trigger(args.skillName);
 
     // Working Memory (Structured Variables)
     case "setVariable":
@@ -26,6 +30,12 @@ export async function execute(name: string, args: any, client: StateClient) {
       return await client.listVariables();
     case "deleteVariable":
       return await client.deleteVariable(args.name);
+
+    // Concepts
+    case "defineConcept":
+      return await client.defineConcept(args.name, args.schema);
+    case "listConcepts":
+      return await client.listConcepts();
 
     // Goals
     case "addGoal":
@@ -48,6 +58,12 @@ export async function execute(name: string, args: any, client: StateClient) {
       );
     case "getActionLog":
       return await client.getActionLog(args.limit, args.actionTypeFilter);
+
+    // Decision Cycles
+    case "runCycle":
+      return await client.runCycle(args.agentId, args.candidates);
+    case "getCycleHistory":
+      return await client.getCycleHistory(args.limit);
 
     default:
       throw new Error(`Unknown tool: ${name}`);

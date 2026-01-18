@@ -193,4 +193,91 @@ export const state = [
       },
     },
   },
+  // Drift (Read Working Memory)
+  {
+    name: "drift",
+    description: "Reads the current items in short-term working memory (Flux).",
+    parameters: {
+      type: "OBJECT",
+      properties: {},
+    },
+  },
+  // Concepts
+  {
+    name: "defineConcept",
+    description:
+      "Defines a concept with a JSON schema for structured knowledge.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        name: {
+          type: "STRING",
+          description: "The name of the concept.",
+        },
+        schema: {
+          type: "STRING",
+          description:
+            "The JSON schema defining the concept structure (JSON-encoded).",
+        },
+      },
+      required: ["name", "schema"],
+    },
+  },
+  {
+    name: "listConcepts",
+    description: "Lists all defined concepts and their schemas.",
+    parameters: {
+      type: "OBJECT",
+      properties: {},
+    },
+  },
+  // Decision Cycles
+  {
+    name: "runCycle",
+    description:
+      "Runs a decision cycle with optional action candidates. The system will select and execute the best action.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        agentId: {
+          type: "STRING",
+          description: "The ID of the agent running the cycle.",
+        },
+        candidates: {
+          type: "STRING",
+          description:
+            "Optional JSON-encoded array of action candidates with actionType, action, score, and rationale.",
+        },
+      },
+      required: ["agentId"],
+    },
+  },
+  {
+    name: "getCycleHistory",
+    description: "Gets the history of decision cycles for the current run.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        limit: {
+          type: "NUMBER",
+          description: "Maximum number of cycles to retrieve.",
+        },
+      },
+    },
+  },
+  // Skills
+  {
+    name: "trigger",
+    description: "Triggers a registered skill or procedure by name.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        skillName: {
+          type: "STRING",
+          description: "The name of the skill to trigger.",
+        },
+      },
+      required: ["skillName"],
+    },
+  },
 ];
