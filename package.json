@@ -29,6 +29,10 @@
             "types": "./dist/tools/openai.d.ts",
             "default": "./dist/tools/openai.js"
         },
+        "./tools/vercel": {
+            "types": "./dist/tools/vercel.d.ts",
+            "default": "./dist/tools/vercel.js"
+        },
         "./tools/execute": {
             "types": "./dist/tools/execute.d.ts",
             "default": "./dist/tools/execute.js"
@@ -56,6 +60,7 @@
         "long": "^5.2.3"
     },
     "devDependencies": {
+        "@ai-sdk/provider-utils": "^4.0.8",
         "@types/jest": "^30.0.0",
         "@types/node": "^20.0.0",
         "dotenv": "^17.2.3",
