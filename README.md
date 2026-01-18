@@ -272,9 +272,38 @@ The SDK provides pre-built tool definitions tailored for popular LLM providers. 
 
 ### Available Imports
 
-- `rice-node-sdk/tools/anthropic`
-- `rice-node-sdk/tools/google`
-- `rice-node-sdk/tools/openai`
+- `rice-node-sdk/tools/anthropic` - Anthropic Claude format
+- `rice-node-sdk/tools/google` - Google Gemini format
+- `rice-node-sdk/tools/openai` - OpenAI function calling format
+- `rice-node-sdk/tools/vercel` - Vercel AI SDK format (with bound execute functions)
+
+### Example Usage (Vercel AI SDK)
+
+The Vercel AI SDK tools come with execute functions pre-bound to your StateClient, making integration seamless.
+
+```typescript
+import { generateText, stepCountIs } from "ai";
+import { google } from "@ai-sdk/google";
+import { Client, statetool } from "rice-node-sdk";
+
+const client = new Client({ runId: "my-agent-session" });
+await client.connect();
+
+// Create tools bound to your StateClient
+const tools = statetool.createVercelTools(client.state);
+
+// Use with generateText - tools are auto-executed!
+const result = await generateText({
+  model: google("gemini-2.0-flash"),
+  tools,
+  stopWhen: stepCountIs(5),
+  system: `You are an assistant with persistent memory.
+Use 'remember' to store facts and 'recall' to search memories.`,
+  prompt: "Remember that I prefer Python for ML projects.",
+});
+
+console.log(result.text);
+```
 
 ### Example Usage (Anthropic)
 
@@ -359,20 +388,26 @@ if (call) {
 
 ### Tools Included
 
-| Tool             | Purpose                                          | SDK Method                      |
-| ---------------- | ------------------------------------------------ | ------------------------------- |
-| `focus`          | Store information in short-term working memory   | `client.state.focus()`          |
-| `remember`       | Store information in long-term persistent memory | `client.state.commit()`         |
-| `recall`         | Retrieve relevant memories from long-term memory | `client.state.reminisce()`      |
-| `setVariable`    | Set a structured variable in working memory      | `client.state.setVariable()`    |
-| `getVariable`    | Get a structured variable from working memory    | `client.state.getVariable()`    |
-| `listVariables`  | List all variables in working memory             | `client.state.listVariables()`  |
-| `deleteVariable` | Delete a variable from working memory            | `client.state.deleteVariable()` |
-| `addGoal`        | Add a new goal to the agent's goal stack         | `client.state.addGoal()`        |
-| `updateGoal`     | Update the status of an existing goal            | `client.state.updateGoal()`     |
-| `listGoals`      | List all goals, optionally filtered by status    | `client.state.listGoals()`      |
-| `submitAction`   | Submit an action for execution and logging       | `client.state.submitAction()`   |
-| `getActionLog`   | Get the action log for the current run           | `client.state.getActionLog()`   |
+| Tool              | Purpose                                          | SDK Method                       |
+| ----------------- | ------------------------------------------------ | -------------------------------- |
+| `focus`           | Store information in short-term working memory   | `client.state.focus()`           |
+| `drift`           | Read current items from short-term memory        | `client.state.drift()`           |
+| `remember`        | Store information in long-term persistent memory | `client.state.commit()`          |
+| `recall`          | Retrieve relevant memories from long-term memory | `client.state.reminisce()`       |
+| `trigger`         | Trigger a registered skill or procedure          | `client.state.trigger()`         |
+| `setVariable`     | Set a structured variable in working memory      | `client.state.setVariable()`     |
+| `getVariable`     | Get a structured variable from working memory    | `client.state.getVariable()`     |
+| `listVariables`   | List all variables in working memory             | `client.state.listVariables()`   |
+| `deleteVariable`  | Delete a variable from working memory            | `client.state.deleteVariable()`  |
+| `defineConcept`   | Define a concept with JSON schema                | `client.state.defineConcept()`   |
+| `listConcepts`    | List all defined concepts                        | `client.state.listConcepts()`    |
+| `addGoal`         | Add a new goal to the agent's goal stack         | `client.state.addGoal()`         |
+| `updateGoal`      | Update the status of an existing goal            | `client.state.updateGoal()`      |
+| `listGoals`       | List all goals, optionally filtered by status    | `client.state.listGoals()`       |
+| `submitAction`    | Submit an action for execution and logging       | `client.state.submitAction()`    |
+| `getActionLog`    | Get the action log for the current run           | `client.state.getActionLog()`    |
+| `runCycle`        | Run a decision cycle with action candidates      | `client.state.runCycle()`        |
+| `getCycleHistory` | Get history of decision cycles                   | `client.state.getCycleHistory()` |
 
 ## API Reference
 
