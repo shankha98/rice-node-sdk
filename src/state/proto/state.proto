@@ -41,6 +41,9 @@ service Cortex {
 
   // Management
   rpc DeleteRun(RunRequest) returns (Ack);
+
+  // Events
+  rpc Subscribe(SubscribeRequest) returns (stream Event);
 }
 
 message FocusRequest {
@@ -291,4 +294,18 @@ message CycleHistoryRequest {
 
 message CycleHistoryResponse {
   repeated CycleResponse cycles = 1;
+}
+
+message SubscribeRequest {
+  string run_id = 1;
+  repeated string event_types = 2; // Optional filter e.g. ["Focus", "Commit"]
+}
+
+message Event {
+  string id = 1;
+  string type = 2; // "Focus", "Commit", "VariableUpdate", "GoalUpdate"
+  string run_id = 3;
+  string agent_id = 4;
+  string payload = 5; // JSON string of the object involved
+  string created_at = 6;
 }

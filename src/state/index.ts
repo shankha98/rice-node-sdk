@@ -544,4 +544,26 @@ export class StateClient {
       );
     });
   }
+
+  // ==========================================================================
+  // Events (Pub/Sub)
+  // ==========================================================================
+
+  /**
+   * Subscribe to real-time events for the current run_id.
+   * Returns a gRPC ClientReadableStream that emits 'data', 'error', and 'end' events.
+   *
+   * usage:
+   * const stream = client.subscribe();
+   * stream.on('data', (event: any) => { ... });
+   */
+  subscribe(eventTypes: string[] = []): any {
+    const request = {
+      run_id: this.runId,
+      event_types: eventTypes,
+    };
+    // For streaming RPCs, we don't provide a callback.
+    // The call object itself is the stream.
+    return this.client.Subscribe(request, this.metadata);
+  }
 }
