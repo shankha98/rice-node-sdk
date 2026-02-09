@@ -266,6 +266,25 @@ console.log(cycleResult.planningTimeMs);
 const history = await client.state.getCycleHistory(10);
 ```
 
+### Pub/Sub (Real-time Events)
+
+Subscribe to real-time events from the State service, such as variable updates or memory commits. This is useful for multi-agent coordination.
+
+```typescript
+// Subscribe to variable updates
+const stream = client.state.subscribe(["VariableUpdate"]);
+
+stream.on("data", (event) => {
+  console.log("Received event:", event.type);
+  if (event.type === "VariableUpdate") {
+    const variable = JSON.parse(event.payload);
+    console.log(`Variable ${variable.name} updated to:`, variable.value_json);
+  }
+});
+
+stream.on("error", (err) => console.error("Stream error:", err));
+```
+
 ## AI Tool Definitions
 
 The SDK provides pre-built tool definitions tailored for popular LLM providers. These tools map directly to State memory operations.
@@ -408,6 +427,7 @@ if (call) {
 | `getActionLog`    | Get the action log for the current run           | `client.state.getActionLog()`    |
 | `runCycle`        | Run a decision cycle with action candidates      | `client.state.runCycle()`        |
 | `getCycleHistory` | Get history of decision cycles                   | `client.state.getCycleHistory()` |
+| `subscribe`       | Subscribe to real-time state events              | `client.state.subscribe()`       |
 
 ## API Reference
 
@@ -489,8 +509,12 @@ interface StateClient {
   ): Promise<CycleResult>;
   getCycleHistory(limit?: number): Promise<CycleResult[]>;
 
+  // Events
+  subscribe(eventTypes?: string[]): NodeJS.EventEmitter;
+
   // Session Management
   setRunId(runId: string): void;
+
   deleteRun(): Promise<boolean>;
 
   // Skills
