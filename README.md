@@ -106,18 +106,30 @@ You can load a specific config file by passing the path to the `Client` construc
 const client = new Client({ configPath: "./config/prod.rice.config.js" });
 ```
 
-#### Managing Run IDs (Multi-User/Multi-Agent)
+#### Managing Run IDs (State Isolation Boundary)
 
-For State memory, the `runId` determines the session or agent context. You can switch run IDs dynamically to manage memory for different users or agents.
+For State memory, `runId` is the isolation boundary. Use one unique run ID per execution/session/test, perform all state operations with that run, then clean up with `deleteRun()`.
 
 ```typescript
-// Option A: Set globally in constructor
-const client = new Client({ runId: "user-123-session" });
+const runId = `session-${Date.now()}`;
+const client = new Client({ runId });
+await client.connect();
 
-// Option B: Switch dynamically
-client.state.setRunId("user-456-session");
-await client.state.focus("New task for user 456");
+await client.state.focus("working memory item");
+await client.state.commit("input", "outcome");
+await client.state.setVariable("k", { v: 1 });
+await client.state.addGoal("Do X", "high");
+await client.state.defineConcept("Profile", { type: "object" });
+
+// cleanup this run
+await client.state.deleteRun();
 ```
+
+Practical rule: use `runId` for isolation. Do not emulate run isolation with metadata filters.
+
+Reference examples:
+- `examples/check_state_run_isolation.ts`
+- `examples/check_state_all_memory_isolation.ts`
 
 ## State Features
 
@@ -435,7 +447,12 @@ if (call) {
 
 ```typescript
 class Client {
-  constructor(options?: { configPath?: string; runId?: string });
+  constructor(options?: {
+    configPath?: string;
+    runId?: string;
+    stateRunId?: string;
+    storageRunId?: string;
+  });
   async connect(): Promise<void>;
   get storage(): StorageClient;
   get state(): StateClient;

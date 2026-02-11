@@ -6,7 +6,9 @@ dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 async function main() {
-  const client = new Client();
+  const runId = `storage-app-run-${Date.now()}`;
+  console.log(`Using Run ID: ${runId}`);
+  const client = new Client({ runId });
   try {
     console.log("Connecting to Storage...");
     await client.connect();

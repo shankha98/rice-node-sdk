@@ -119,6 +119,7 @@ export class HttpClient extends BaseRiceDBClient {
     userId: Long | number | string = 1,
     sessionId?: string,
     embedding?: number[],
+    runId?: string,
   ): Promise<InsertResult> {
     // Automatically store text in metadata so it can be retrieved
     const meta = { ...metadata };
@@ -134,6 +135,7 @@ export class HttpClient extends BaseRiceDBClient {
     };
     if (sessionId) payload.session_id = sessionId;
     if (embedding) payload.embedding = embedding;
+    if (runId) payload.run_id = runId;
 
     const res = await this.request<any>("POST", "/insert", payload);
     if (!res.success) {
@@ -153,6 +155,7 @@ export class HttpClient extends BaseRiceDBClient {
     sessionId?: string,
     filter?: { [key: string]: any },
     queryEmbedding?: number[],
+    runId?: string,
   ): Promise<SearchResultItem[]> {
     const payload: any = {
       query,
@@ -162,6 +165,7 @@ export class HttpClient extends BaseRiceDBClient {
     if (sessionId) payload.session_id = sessionId;
     if (filter) payload.filter = filter;
     if (queryEmbedding) payload.query_embedding = queryEmbedding;
+    if (runId) payload.run_id = runId;
 
     const res = await this.request<any>("POST", "/search", payload);
     const results = Array.isArray(res) ? res : res.results || [];
@@ -191,6 +195,18 @@ export class HttpClient extends BaseRiceDBClient {
       params,
     );
     return true;
+  }
+
+  async deleteRun(
+    runId?: string,
+  ): Promise<{ success: boolean; message: string; count: Long }> {
+    if (!runId) throw new Error("runId is required for deleteRun");
+    const res = await this.request<any>("DELETE", `/run/${runId}`);
+    return {
+      success: res.success,
+      message: res.message,
+      count: Long.fromValue(res.count),
+    };
   }
 
   // Cortex

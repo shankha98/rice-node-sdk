@@ -7,6 +7,8 @@ import * as path from "path";
 export interface ClientOptions {
   configPath?: string;
   runId?: string;
+  stateRunId?: string;
+  storageRunId?: string;
 }
 
 export class Client {
@@ -55,9 +57,21 @@ export class Client {
         ? parseInt(process.env.STORAGE_HTTP_PORT, 10)
         : 3000;
 
-      // We assume STORAGE_INSTANCE_URL points to the gRPC port
-      // Pass token to constructor initially (if it's a valid token, it works; if it's a password, we login)
-      this._storage = new RiceDBClient(host, "auto", port, httpPort, token);
+      const storageRunId =
+        this.options.storageRunId ||
+        this.options.runId ||
+        process.env.STORAGE_RUN_ID;
+
+      // We assume STORAGE_INSTANCE_URL points to the gRPC port.
+      // Pass token to constructor initially (if it's a valid token, it works; if it's a password, we login).
+      this._storage = new RiceDBClient(
+        host,
+        "auto",
+        port,
+        httpPort,
+        token,
+        storageRunId,
+      );
       await this._storage.connect();
 
       if (token) {
@@ -79,7 +93,11 @@ export class Client {
     if (this._config.state?.enabled) {
       const address = process.env.STATE_INSTANCE_URL || "localhost:50051";
       const token = process.env.STATE_AUTH_TOKEN;
-      const runId = this.options.runId || process.env.STATE_RUN_ID || "default";
+      const runId =
+        this.options.stateRunId ||
+        this.options.runId ||
+        process.env.STATE_RUN_ID ||
+        "default";
       this._state = new StateClient(address, token, runId);
     }
   }

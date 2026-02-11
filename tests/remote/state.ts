@@ -51,6 +51,10 @@ async function main() {
         "VERIFICATION FAILED: Could not retrieve newly inserted memory.",
       );
     }
+
+    console.log("Cleaning up run...");
+    const deleted = await client.state.deleteRun();
+    console.log("Run cleanup success:", deleted);
   } catch (error) {
     console.error("State Test Failed:", error);
   }

@@ -126,6 +126,7 @@ export class GrpcClient extends BaseRiceDBClient {
     userId: Long | number | string = 1,
     sessionId?: string,
     embedding?: number[],
+    runId?: string,
   ): Promise<InsertResult> {
     if (!this.client) throw new Error("Not connected");
 
@@ -142,6 +143,7 @@ export class GrpcClient extends BaseRiceDBClient {
       userId: this.toLong(userId),
       sessionId,
       embedding: embedding || [],
+      runId,
     };
     const res = await this.promisify(this.client.insert, req);
     return res as InsertResult;
@@ -154,6 +156,7 @@ export class GrpcClient extends BaseRiceDBClient {
     sessionId?: string,
     filter?: { [key: string]: any },
     queryEmbedding?: number[],
+    runId?: string,
   ): Promise<SearchResultItem[]> {
     if (!this.client) throw new Error("Not connected");
     const req = {
@@ -163,6 +166,7 @@ export class GrpcClient extends BaseRiceDBClient {
       sessionId,
       filter: filter ? JSON.stringify(filter) : "",
       queryEmbedding: queryEmbedding || [],
+      runId,
     };
     const res: any = await this.promisify(this.client.search, req);
     return res.results.map((r: any) => {
@@ -186,6 +190,22 @@ export class GrpcClient extends BaseRiceDBClient {
       sessionId,
     });
     return res.success;
+  }
+
+  async deleteRun(
+    runId?: string,
+  ): Promise<{ success: boolean; message: string; count: Long }> {
+    if (!this.client) throw new Error("Not connected");
+    if (!runId) throw new Error("runId is required for deleteRun");
+    const res: any = await this.promisify(this.client.deleteRun, {
+      runId,
+      userId: this.toLong(1),
+    });
+    return {
+      success: res.success,
+      message: res.message,
+      count: res.count,
+    };
   }
 
   async createSession(parentSessionId?: string): Promise<string> {
@@ -409,6 +429,7 @@ export class GrpcClient extends BaseRiceDBClient {
           metadata,
           userId: docUserId,
           sessionId: undefined,
+          embedding: [],
         });
       }
       stream.end();

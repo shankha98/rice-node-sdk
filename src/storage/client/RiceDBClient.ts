@@ -20,6 +20,7 @@ export class RiceDBClient extends BaseRiceDBClient {
   private _grpcPort: number;
   private _httpPort: number;
   private token: string | undefined;
+  private runId: string | undefined;
 
   /**
    * Creates a new RiceDB client instance.
@@ -28,19 +29,26 @@ export class RiceDBClient extends BaseRiceDBClient {
    * @param grpcPort - The port for gRPC connections (default: 50051).
    * @param httpPort - The port for HTTP connections (default: 3000).
    * @param token - Optional authentication token.
+   * @param runId - Optional run identifier for storage data isolation.
    */
   constructor(
     host: string = "localhost",
     transport: "grpc" | "http" | "auto" = "auto",
     grpcPort: number = 50051,
     httpPort: number = 3000,
-    token?: string
+    token?: string,
+    runId?: string,
   ) {
     super(host, 0);
     this.transport = transport;
     this._grpcPort = grpcPort;
     this._httpPort = httpPort;
     this.token = token;
+    this.runId = runId;
+  }
+
+  setRunId(runId: string) {
+    this.runId = runId;
   }
 
   /**
@@ -178,7 +186,8 @@ export class RiceDBClient extends BaseRiceDBClient {
     metadata: any,
     userId: Long | number | string = 1,
     sessionId?: string,
-    embedding?: number[]
+    embedding?: number[],
+    runId?: string,
   ): Promise<InsertResult> {
     this.checkConnected();
     return this.client!.insert(
@@ -187,7 +196,8 @@ export class RiceDBClient extends BaseRiceDBClient {
       metadata,
       userId,
       sessionId,
-      embedding
+      embedding,
+      runId || this.runId,
     );
   }
 
@@ -207,7 +217,8 @@ export class RiceDBClient extends BaseRiceDBClient {
     k: number = 10,
     sessionId?: string,
     filter?: { [key: string]: any },
-    queryEmbedding?: number[]
+    queryEmbedding?: number[],
+    runId?: string,
   ): Promise<SearchResultItem[]> {
     this.checkConnected();
     return this.client!.search(
@@ -216,7 +227,8 @@ export class RiceDBClient extends BaseRiceDBClient {
       k,
       sessionId,
       filter,
-      queryEmbedding
+      queryEmbedding,
+      runId || this.runId,
     );
   }
 
@@ -232,6 +244,17 @@ export class RiceDBClient extends BaseRiceDBClient {
   ): Promise<boolean> {
     this.checkConnected();
     return this.client!.delete(nodeId, sessionId);
+  }
+
+  async deleteRun(
+    runId?: string,
+  ): Promise<{ success: boolean; message: string; count: Long }> {
+    this.checkConnected();
+    const targetRunId = runId || this.runId;
+    if (!targetRunId) {
+      throw new Error("runId is required for deleteRun");
+    }
+    return this.client!.deleteRun(targetRunId);
   }
 
   /**

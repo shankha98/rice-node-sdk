@@ -8,6 +8,7 @@ jest.mock("../src/storage/client/GrpcClient", () => {
           .mockRejectedValue(new Error("Mocked gRPC connection failure")),
         insert: jest.fn(),
         search: jest.fn(),
+        deleteRun: jest.fn(),
       };
     }),
   };
@@ -29,6 +30,11 @@ jest.mock("../src/storage/client/HttpClient", () => {
             { id: { toString: () => "123" }, similarity: 0.9 },
           ]),
         delete: jest.fn().mockResolvedValue(true),
+        deleteRun: jest.fn().mockResolvedValue({
+          success: true,
+          message: "deleted",
+          count: { toString: () => "1" },
+        }),
       };
     }),
   };

@@ -62,6 +62,7 @@ export abstract class BaseRiceDBClient {
     userId?: Long | number | string,
     sessionId?: string,
     embedding?: number[],
+    runId?: string,
   ): Promise<InsertResult>;
 
   abstract search(
@@ -71,12 +72,17 @@ export abstract class BaseRiceDBClient {
     sessionId?: string,
     filter?: { [key: string]: any },
     queryEmbedding?: number[],
+    runId?: string,
   ): Promise<SearchResultItem[]>;
 
   abstract delete(
     nodeId: Long | number | string,
     sessionId?: string,
   ): Promise<boolean>;
+
+  abstract deleteRun(
+    runId?: string,
+  ): Promise<{ success: boolean; message: string; count: Long }>;
 
   // Cortex Session
   abstract createSession(parentSessionId?: string): Promise<string>;

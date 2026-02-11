@@ -160,6 +160,10 @@ async function main() {
     const reasonActions = await client.state.getActionLog(10, "reason");
     console.log("Reason actions:", reasonActions);
 
+    console.log("\nCleaning up run...");
+    const deleted = await client.state.deleteRun();
+    console.log("Run cleanup success:", deleted);
+
     console.log("\n=== All Tests Completed ===");
   } catch (error) {
     console.error("State Test Failed:", error);
